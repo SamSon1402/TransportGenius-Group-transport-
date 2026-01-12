@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdvisorCopilot - AI Quote Generation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --naboo-orange: #ff6b00;
+            --naboo-yellow: #ffc107;
+            --naboo-green: #00c853;
+            --naboo-red: #ff1744;
+            --naboo-blue: #2979ff;
+            --naboo-purple: #7c4dff;
+            --naboo-cyan: #00bcd4;
+            --steel-dark: #1a1d21;
+            --steel-mid: #2d3139;
+            --steel-light: #3d4451;
+            --steel-lighter: #4d5563;
+            --text-white: #ffffff;
+            --text-gray: #9ca3af;
+            --text-dim: #6b7280;
+            --border-steel: #404854;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            background: var(--steel-dark);
+            color: var(--text-white);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--steel-mid);
+            border-bottom: 3px solid var(--naboo-orange);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--naboo-orange), #ff8533);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .logo-subtitle {
+            font-size: 0.65rem;
+            color: var(--naboo-orange);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .badge {
+            background: var(--steel-light);
+            border: 1px solid var(--border-steel);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .badge.active {
+            background: rgba(0, 200, 83, 0.15);
+            border-color: var(--naboo-green);
+            color: var(--naboo-green);
+        }
+
+        .badge.active::before {
+            content: '●';
+            margin-right: 6px;
+            animation: blink 1s infinite;
+        }
+
+        .badge.naboo {
+            background: rgba(255, 107, 0, 0.15);
+            border-color: var(--naboo-orange);
+            color: var(--naboo-orange);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .main {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero h1 span { color: var(--naboo-orange); }
+
+        .hero p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1300px) {
+            .workspace { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--steel-mid);
+            border: 1px solid var(--border-steel);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-steel);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(255, 107, 0, 0.05) 0%, transparent 100%);
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .card-body { padding: 1.5rem; }
+
+        /* Brief Input Form */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: var(--steel-dark);
+            border: 2px solid var(--border-steel);
+            border-radius: 6px;
+            padding: 0.875rem 1rem;
+            color: var(--text-white);
+            font-family: 'Archivo', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--naboo-orange);
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* Agent Workflow Visualization */
+        .workflow-container {
+            background: var(--steel-dark);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .workflow-container.active { display: block; }
+
+        .workflow-title {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .workflow-steps {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--steel-light);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .workflow-step.active {
+            border-color: var(--naboo-orange);
+            background: rgba(255, 107, 0, 0.15);
+            animation: pulse 1s infinite;
+        }
+
+        .workflow-step.complete {
+            border-color: var(--naboo-green);
+            background: rgba(0, 200, 83, 0.15);
+            color: var(--naboo-green);
+        }
+
+        .workflow-step.complete::before {
+            content: '✓';
+            margin-right: 4px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 0, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(255, 107, 0, 0); }
+        }
+
+        .workflow-arrow {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        /* Quote Output */
+        .quote-container {
+            background: var(--steel-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .quote-container.active { display: block; }
+
+        .quote-header {
+            background: linear-gradient(135deg, var(--naboo-orange), #ff8533);
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quote-title {
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quote-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .quote-body { padding: 1.5rem; }
+
+        .quote-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .quote-section-title {
+            font-size: 0.7rem;
+            color: var(--naboo-orange);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quote-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--steel-mid);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .quote-item-name {
+            font-size: 0.85rem;
+        }
+
+        .quote-item-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--naboo-orange);
+        }
+
+        .quote-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--steel-mid);
+            border-radius: 6px;
+            border: 2px solid var(--naboo-orange);
+            margin-top: 1rem;
+        }
+
+        .quote-total-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .quote-total-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--naboo-green);
+        }
+
+        .quote-co2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: rgba(0, 200, 83, 0.1);
+            border: 1px solid var(--naboo-green);
+            border-radius: 6px;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-family: 'Archivo', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--naboo-orange);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #ff8533;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.4);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary {
+            background: var(--steel-light);
+            color: var(--text-gray);
+            border: 1px solid var(--border-steel);
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--steel-lighter);
+            color: var(--text-white);
+            border-color: var(--naboo-orange);
+        }
+
+        .btn-approve {
+            background: var(--naboo-green);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            box-shadow: 0 0 30px rgba(0, 200, 83, 0.4);
+        }
+
+        /* Sidebar */
+        .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+        .stat-card {
+            background: var(--steel-light);
+            border-radius: 6px;
+            padding: 1.25rem;
+        }
+
+        .stat-card.orange { border-left: 4px solid var(--naboo-orange); }
+        .stat-card.green { border-left: 4px solid var(--naboo-green); }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-steel);
+            font-size: 0.8rem;
+        }
+
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row-label { color: var(--text-dim); text-transform: uppercase; font-size: 0.7rem; }
+        .stat-row-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--naboo-orange); }
+
+        /* Agent State */
+        .agent-state {
+            background: var(--steel-dark);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .agent-log {
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--border-steel);
+        }
+
+        .agent-log.tool { border-color: var(--naboo-blue); }
+        .agent-log.reasoning { border-color: var(--naboo-purple); }
+        .agent-log.output { border-color: var(--naboo-green); }
+
+        .agent-log-time {
+            color: var(--text-dim);
+            font-size: 0.6rem;
+        }
+
+        /* Tool Calls */
+        .tool-call {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--steel-dark);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .tool-call-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--naboo-blue);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        .tool-call-name { font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
+        .tool-call-status { margin-left: auto; }
+        .tool-call-status.success { color: var(--naboo-green); }
+        .tool-call-status.pending { color: var(--naboo-yellow); animation: blink 1s infinite; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--steel-mid);
+            border: 2px solid var(--naboo-green);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 200, 83, 0.3);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-icon { font-size: 1.5rem; }
+        .toast-title { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; }
+        .toast-message { font-size: 0.75rem; color: var(--text-dim); }
+
+        /* Human in the Loop Banner */
+        .hitl-banner {
+            background: linear-gradient(90deg, rgba(255, 193, 7, 0.15), transparent);
+            border: 1px solid var(--naboo-yellow);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hitl-banner.active { display: flex; }
+
+        .hitl-icon { font-size: 1.5rem; }
+        .hitl-text { font-size: 0.8rem; }
+        .hitl-text strong { color: var(--naboo-yellow); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🤖</div>
+                <div>
+                    <div class="logo-text">AdvisorCopilot</div>
+                    <div class="logo-subtitle">AI Quote Generation</div>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge active">Agent Online</span>
+                <span class="badge naboo">Naboo AI</span>
+                <span class="badge">LangGraph</span>
+                <span class="badge">Human-in-Loop</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="hero">
+            <h1>🤖 <span>Advisor</span> Copilot</h1>
+            <p>LangGraph-powered quote generation with human-in-the-loop approval</p>
+        </div>
+
+        <div class="workspace">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📝 Client Brief</h3>
+                    <span style="font-size: 0.7rem; color: var(--text-dim);">Enter event requirements</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label class="form-label">Company Name</label>
+                        <input type="text" class="form-input" id="companyName" placeholder="e.g., Société Générale">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Event Type</label>
+                            <select class="form-select" id="eventType">
+                                <option value="seminar">Seminar Résidentiel</option>
+                                <option value="teambuilding">Team Building</option>
+                                <option value="conference">Conference</option>
+                                <option value="retreat">Executive Retreat</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Number of Participants</label>
+                            <input type="number" class="form-input" id="participants" placeholder="e.g., 45">
+                        </div>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-input" id="eventDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Duration (Days)</label>
+                            <select class="form-select" id="duration">
+                                <option value="1">1 Day</option>
+                                <option value="2" selected>2 Days</option>
+                                <option value="3">3 Days</option>
+                                <option value="5">5 Days</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Budget (€)</label>
+                            <input type="number" class="form-input" id="budget" placeholder="e.g., 25000">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Preferred Region</label>
+                            <select class="form-select" id="region">
+                                <option value="idf">Île-de-France (<2h Paris)</option>
+                                <option value="normandy">Normandie</option>
+                                <option value="provence">Provence-Alpes-Côte d'Azur</option>
+                                <option value="loire">Val de Loire</option>
+                                <option value="alps">Alpes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ambiance</label>
+                            <select class="form-select" id="ambiance">
+                                <option value="modern">Modern / Contemporary</option>
+                                <option value="classic">Classic / Elegant</option>
+                                <option value="rustic">Rustic / Authentic</option>
+                                <option value="nature">Nature / Green</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Special Requirements</label>
+                        <textarea class="form-textarea" id="requirements" placeholder="e.g., Need wheelchair access, vegetarian catering options, outdoor team activities..."></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="runAgent()">
+                        <span>🚀</span> Generate Quote
+                    </button>
+
+                    <div class="workflow-container" id="workflowContainer">
+                        <div class="workflow-title">🔄 LangGraph Workflow</div>
+                        <div class="workflow-steps" id="workflowSteps">
+                            <span class="workflow-step" id="step-parse">Parse Brief</span>
+                            <span class="workflow-arrow">→</span>
+                            <span class="workflow-step" id="step-venue">Query Venues</span>
+                            <span class="workflow-arrow">→</span>
+                            <span class="workflow-step" id="step-availability">Check Availability</span>
+                            <span class="workflow-arrow">→</span>
+                            <span class="workflow-step" id="step-package">Build Package</span>
+                            <span class="workflow-arrow">→</span>
+                            <span class="workflow-step" id="step-price">Calculate Pricing</span>
+                            <span class="workflow-arrow">→</span>
+                            <span class="workflow-step" id="step-review">Human Review</span>
+                        </div>
+                    </div>
+
+                    <div class="hitl-banner" id="hitlBanner">
+                        <span class="hitl-icon">👤</span>
+                        <div class="hitl-text">
+                            <strong>Human-in-the-Loop:</strong> Quote ready for advisor review and approval before sending to client.
+                        </div>
+                    </div>
+
+                    <div class="quote-container" id="quoteContainer">
+                        <div class="quote-header">
+                            <span class="quote-title" id="quoteTitle">📋 Quote: Société Générale</span>
+                            <span class="quote-badge">DRAFT</span>
+                        </div>
+                        <div class="quote-body">
+                            <div class="quote-section">
+                                <div class="quote-section-title">🏰 Venue</div>
+                                <div class="quote-item">
+                                    <span class="quote-item-name" id="quotedVenue">Domaine de Chantilly</span>
+                                    <span class="quote-item-price" id="venuePrice">€8,500</span>
+                                </div>
+                            </div>
+                            <div class="quote-section">
+                                <div class="quote-section-title">🍽️ Catering</div>
+                                <div class="quote-item">
+                                    <span class="quote-item-name">Full Board (2 days)</span>
+                                    <span class="quote-item-price" id="cateringPrice">€4,200</span>
+                                </div>
+                            </div>
+                            <div class="quote-section">
+                                <div class="quote-section-title">🎯 Activities</div>
+                                <div class="quote-item">
+                                    <span class="quote-item-name" id="quotedActivities">Team Building Package</span>
+                                    <span class="quote-item-price" id="activitiesPrice">€2,800</span>
+                                </div>
+                            </div>
+                            <div class="quote-section">
+                                <div class="quote-section-title">🚌 Transport</div>
+                                <div class="quote-item">
+                                    <span class="quote-item-name" id="quotedTransport">Private Coach (Paris roundtrip)</span>
+                                    <span class="quote-item-price" id="transportPrice">€1,200</span>
+                                </div>
+                            </div>
+                            <div class="quote-total">
+                                <span class="quote-total-label">Total Package</span>
+                                <span class="quote-total-value" id="totalPrice">€16,700</span>
+                            </div>
+                            <div class="quote-co2">
+                                <span>🌱</span>
+                                <span><strong id="co2Saved">142 kg</strong> CO₂ saved vs. international travel</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons" id="actionButtons" style="display: none;">
+                        <button class="btn btn-approve" onclick="approveQuote()">✓ Approve & Send</button>
+                        <button class="btn btn-secondary" onclick="editQuote()">✏️ Edit Quote</button>
+                        <button class="btn btn-secondary" onclick="regenerate()">🔄 Regenerate</button>
+                        <button class="btn btn-secondary" onclick="exportPDF()">📄 Export PDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Session Stats</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="stat-card orange">
+                            <div class="stat-label">Quotes Generated</div>
+                            <div class="stat-value" style="color: var(--naboo-orange);" id="quotesGenerated">0</div>
+                            <div class="stat-subtitle">This session</div>
+                        </div>
+
+                        <div style="margin-top: 1rem;">
+                            <div class="stat-row">
+                                <span class="stat-row-label">Avg Generation Time</span>
+                                <span class="stat-row-value" id="avgTime">—</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-row-label">Approval Rate</span>
+                                <span class="stat-row-value" id="approvalRate">—</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-row-label">Avg Quote Value</span>
+                                <span class="stat-row-value" id="avgValue">—</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-row-label">LLM</span>
+                                <span class="stat-row-value">GPT-4 / Mistral</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-row-label">Orchestration</span>
+                                <span class="stat-row-value">LangGraph</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🔧 Tool Calls</h3>
+                    </div>
+                    <div class="card-body" id="toolCalls">
+                        <div style="color: var(--text-dim); font-size: 0.75rem; text-align: center;">
+                            No tool calls yet
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📜 Agent Log</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="agent-state" id="agentLog">
+                            <div style="color: var(--text-dim); text-align: center;">
+                                Waiting for input...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚙️ Agent Config</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="font-size: 0.75rem; line-height: 2;">
+                            <p><span style="color: var(--naboo-blue);">●</span> <strong>State:</strong> Checkpointed</p>
+                            <p><span style="color: var(--naboo-green);">●</span> <strong>Memory:</strong> MongoDB</p>
+                            <p><span style="color: var(--naboo-purple);">●</span> <strong>Tools:</strong> 6 enabled</p>
+                            <p><span style="color: var(--naboo-yellow);">●</span> <strong>Guardrails:</strong> Active</p>
+                            <p><span style="color: var(--naboo-orange);">●</span> <strong>HITL:</strong> Required</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast">
+        <span class="toast-icon">✅</span>
+        <div>
+            <div class="toast-title" id="toastTitle">Quote Generated</div>
+            <div class="toast-message" id="toastMessage">Ready for review</div>
+        </div>
+    </div>
+
+    <script>
+        let sessionStats = { quotes: 0, times: [], values: [], approved: 0 };
+        const steps = ['parse', 'venue', 'availability', 'package', 'price', 'review'];
+        
+        const venues = {
+            idf: ['Domaine de Chantilly', 'Château de Fontainebleau', 'Domaine de Vermoise'],
+            normandy: ['Manoir de Surville', 'Château du Breuil', 'Domaine de Villers'],
+            provence: ['Mas de la Rose', 'Château de Berne', 'Domaine de Fontenille'],
+            loire: ['Château de Chambord', 'Domaine des Hauts de Loire', 'Château de la Bourdaisière'],
+            alps: ['Chalet Zannier', 'Les Fermes de Marie', 'Hôtel Mont-Blanc']
+        };
+
+        const activities = {
+            seminar: 'Workshop & Breakout Sessions',
+            teambuilding: 'Outdoor Team Challenges',
+            conference: 'Plenary & Networking',
+            retreat: 'Spa & Wellness Activities'
+        };
+
+        function runAgent() {
+            const company = document.getElementById('companyName').value || 'Client';
+            const participants = parseInt(document.getElementById('participants').value) || 40;
+            const budget = parseInt(document.getElementById('budget').value) || 20000;
+            const region = document.getElementById('region').value;
+            const eventType = document.getElementById('eventType').value;
+            const duration = parseInt(document.getElementById('duration').value);
+
+            document.getElementById('workflowContainer').classList.add('active');
+            document.getElementById('quoteContainer').classList.remove('active');
+            document.getElementById('hitlBanner').classList.remove('active');
+            document.getElementById('actionButtons').style.display = 'none';
+
+            // Reset steps
+            steps.forEach(s => {
+                document.getElementById(`step-${s}`).classList.remove('active', 'complete');
+            });
+
+            // Clear and setup tool calls
+            const toolCallsEl = document.getElementById('toolCalls');
+            toolCallsEl.innerHTML = '';
+
+            const tools = [
+                { icon: '📋', name: 'parse_brief', delay: 500 },
+                { icon: '🏰', name: 'query_venues', delay: 1200 },
+                { icon: '📅', name: 'check_availability', delay: 2000 },
+                { icon: '💰', name: 'get_pricing', delay: 2800 },
+                { icon: '🧮', name: 'calculate_total', delay: 3500 },
+                { icon: '🌱', name: 'estimate_co2', delay: 4000 }
+            ];
+
+            tools.forEach((tool, i) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'tool-call';
+                    div.innerHTML = `
+                        <span class="tool-call-icon">${tool.icon}</span>
+                        <span class="tool-call-name">${tool.name}</span>
+                        <span class="tool-call-status pending">●</span>
+                    `;
+                    toolCallsEl.appendChild(div);
+                    
+                    setTimeout(() => {
+                        div.querySelector('.tool-call-status').className = 'tool-call-status success';
+                        div.querySelector('.tool-call-status').textContent = '✓';
+                    }, 400);
+                }, tool.delay);
+            });
+
+            // Agent log
+            const logEl = document.getElementById('agentLog');
+            logEl.innerHTML = '';
+
+            const logs = [
+                { time: '0.0s', text: 'Initializing LangGraph workflow...', type: 'reasoning' },
+                { time: '0.3s', text: `Parsing brief for ${company}...`, type: 'tool' },
+                { time: '0.8s', text: `Extracted: ${participants} pax, ${duration} days, €${budget}`, type: 'output' },
+                { time: '1.4s', text: `Querying venue database for ${region}...`, type: 'tool' },
+                { time: '2.2s', text: 'Checking real-time availability...', type: 'tool' },
+                { time: '3.0s', text: 'Building optimal package combination...', type: 'reasoning' },
+                { time: '3.8s', text: 'Calculating final pricing...', type: 'tool' },
+                { time: '4.3s', text: 'Estimating CO2 savings...', type: 'tool' },
+                { time: '4.8s', text: '✓ Quote generated - awaiting human approval', type: 'output' }
+            ];
+
+            logs.forEach((log, i) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = `agent-log ${log.type}`;
+                    div.innerHTML = `<span class="agent-log-time">[${log.time}]</span> ${log.text}`;
+                    logEl.appendChild(div);
+                    logEl.scrollTop = logEl.scrollHeight;
+                }, parseFloat(log.time) * 1000);
+            });
+
+            // Animate workflow steps
+            let stepIndex = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIndex > 0) {
+                    document.getElementById(`step-${steps[stepIndex - 1]}`).classList.remove('active');
+                    document.getElementById(`step-${steps[stepIndex - 1]}`).classList.add('complete');
+                }
+                if (stepIndex < steps.length) {
+                    document.getElementById(`step-${steps[stepIndex]}`).classList.add('active');
+                    stepIndex++;
+                } else {
+                    clearInterval(stepInterval);
+                    showQuote(company, participants, budget, region, eventType, duration);
+                }
+            }, 800);
+        }
+
+        function showQuote(company, participants, budget, region, eventType, duration) {
+            document.getElementById(`step-review`).classList.remove('active');
+            document.getElementById(`step-review`).classList.add('complete');
+
+            // Calculate prices
+            const venuePrice = Math.floor(participants * 80 * duration);
+            const cateringPrice = Math.floor(participants * 45 * duration);
+            const activitiesPrice = Math.floor(participants * 35 * duration);
+            const transportPrice = Math.floor(participants * 25);
+            const total = venuePrice + cateringPrice + activitiesPrice + transportPrice;
+
+            // Select venue
+            const venueList = venues[region] || venues.idf;
+            const selectedVenue = venueList[Math.floor(Math.random() * venueList.length)];
+
+            // Update quote
+            document.getElementById('quoteTitle').textContent = `📋 Quote: ${company}`;
+            document.getElementById('quotedVenue').textContent = selectedVenue;
+            document.getElementById('venuePrice').textContent = `€${venuePrice.toLocaleString()}`;
+            document.getElementById('cateringPrice').textContent = `€${cateringPrice.toLocaleString()}`;
+            document.getElementById('quotedActivities').textContent = activities[eventType];
+            document.getElementById('activitiesPrice').textContent = `€${activitiesPrice.toLocaleString()}`;
+            document.getElementById('transportPrice').textContent = `€${transportPrice.toLocaleString()}`;
+            document.getElementById('totalPrice').textContent = `€${total.toLocaleString()}`;
+            document.getElementById('co2Saved').textContent = `${Math.floor(participants * 3.5)} kg`;
+
+            document.getElementById('quoteContainer').classList.add('active');
+            document.getElementById('hitlBanner').classList.add('active');
+            document.getElementById('actionButtons').style.display = 'grid';
+
+            // Update stats
+            sessionStats.quotes++;
+            sessionStats.values.push(total);
+            sessionStats.times.push(4.8);
+
+            document.getElementById('quotesGenerated').textContent = sessionStats.quotes;
+            const avgTime = sessionStats.times.reduce((a, b) => a + b, 0) / sessionStats.times.length;
+            document.getElementById('avgTime').textContent = avgTime.toFixed(1) + 's';
+            const avgValue = sessionStats.values.reduce((a, b) => a + b, 0) / sessionStats.values.length;
+            document.getElementById('avgValue').textContent = '€' + Math.floor(avgValue).toLocaleString();
+
+            showToast('Quote Generated', `€${total.toLocaleString()} for ${company}`);
+        }
+
+        function approveQuote() {
+            sessionStats.approved++;
+            const rate = Math.floor((sessionStats.approved / sessionStats.quotes) * 100);
+            document.getElementById('approvalRate').textContent = rate + '%';
+            showToast('Quote Approved', 'Sent to client via email');
+        }
+
+        function editQuote() { showToast('Edit Mode', 'Adjusting quote details...'); }
+        function regenerate() { runAgent(); }
+        function exportPDF() { showToast('Exporting', 'Generating PDF quote...'); }
+
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // Set default date
+        document.getElementById('eventDate').valueAsDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    </script>
+</body>
+</html>
